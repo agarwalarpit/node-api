@@ -1,16 +1,16 @@
 {
-  "BEEPI": {
+  "PROJECT_NAME": {
     "MONGO_PROD": {
       "HOST"     : "*",
       "PORT"     : 41432,
-      "USER"     : "beepiuser",
-      "PASSWORD" : "somepassword",
-      "DB_NAME"   : "beepidb"
+      "USER"     : "PROJECT_NAME_USER",
+      "PASSWORD" : "SOMEPASSWORD",
+      "DB_NAME"   : "PROJECT_NAME_DB"
     },
     "MONGO_DEV": {
       "HOST"     : "localhost",
       "PORT"     : 27017,
-      "DB_NAME"   : "beepidb"
+      "DB_NAME"   : "PROJECT_NAME_DB"
     },
     "REDIS_PROD": {
       "URL" : "*"

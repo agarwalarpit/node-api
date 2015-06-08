@@ -17,10 +17,10 @@ initMongo = function () {
     var url = null;
 
     if (env == 'dev') {
-        db_config = config.get('BEEPI.MONGO_DEV');
+        db_config = config.get('PROJECT_NAME.MONGO_DEV');
         url = 'mongodb://' + db_config.host + ':' + db_config.port + '/' + db_config.dbName;
     } else if (env == 'production') {
-        db_config = config.get("BEEPI.MONGO_PROD");
+        db_config = config.get("PROJECT_NAME.MONGO_PROD");
         url = 'mongodb://' + db_config.user + ':' + db_config.password + '@' + db_config.host + ':' + db_config.port + '/' + db_config.dbName;
     }
 
@@ -47,10 +47,10 @@ initMongo = function () {
 var initRedis;
 initRedis = function () {
     if (env == 'dev') {
-        var redisConfig = config.get("BEEPI.REDIS_DEV");
+        var redisConfig = config.get("PROJECT_NAME.REDIS_DEV");
         global.REDIS_CLIENT = redis.createClient(redisConfig['PORT'], redisConfig['HOST'], {no_ready_check: true});
     } else {
-        var redis_url = url.parse(config.get("BEEPI.REDIS_PROD.URL"));
+        var redis_url = url.parse(config.get("PROJECT_NAME.REDIS_PROD.URL"));
         global.REDIS_CLIENT = redis.createClient(redis_url.port, redis_url.hostname, {no_ready_check: true});
         global.REDIS_CLIENT.auth(redis_url.auth.split(":")[1]);
     }
@@ -65,8 +65,8 @@ initRedis = function () {
 /****************** Server Init ****************************/
 var initServer;
 initServer = function () {
-    server.listen(config.get('BEEPI.SERVER.PORT'), function () {
-        console.log('Server Started Listening on the port ' + config.get("BEEPI.SERVER.PORT"));
+    server.listen(config.get('PROJECT_NAME.SERVER.PORT'), function () {
+        console.log('Server Started Listening on the port ' + config.get("PROJECT_NAME.SERVER.PORT"));
         console.log("Magic is happening!.");
     });
 };

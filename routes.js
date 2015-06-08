@@ -1,7 +1,7 @@
 var testing = require('./controllers/testing');
 
 var initTestRoute = function(server){
-    server.post('/process-fb-access-token', testing.processTesting);
+    server.post('/processTesting', testing.processTesting);
 };
 
 var router = function(server){
