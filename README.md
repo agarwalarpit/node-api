@@ -1,10 +1,13 @@
-# A framework for making API engine in Node.
+# node-api
+A framework for making API engine in Node API based project with Redis | Mongo integrations.
+Just update the remote/local urls.
 
 And readily available framework integrations with:
 
 - Restify
 - Mongoose
 - Redis
+... (check package.json).
 
 ## Installation
 
