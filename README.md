@@ -19,3 +19,6 @@ And readily available framework integrations with:
 
 ## Testing the API
 Test your API using [Postman](https://chrome.google.com/webstore/detail/postman-rest-client-packa/fhbjgbiflinjbdggehcddcbncdddomop)
+
+## Tips
+You can customize the project by replacing PROJECT_NAME to the actual project-name.
