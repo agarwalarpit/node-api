@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+.idea*
+*node_modules*
+=======
 # Logs
 logs
 *.log
@@ -25,3 +29,4 @@ build/Release
 # Dependency directory
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
 node_modules
+>>>>>>> 88f7a2061f8f43daf8ac572e0dca6fcaea59e528
