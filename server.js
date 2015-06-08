@@ -1,127 +1,50 @@
 
-// BASE SETUP
-// =============================================================================
-
-// call the packages we need
-var express    = require('express');
+// Load required packages
+var express = require('express');
+var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
-var app        = express();
-var morgan     = require('morgan');
+var beerController = require('./controllers/beer');
+var userController = require('./controllers/user');
+var passport = require('passport');
+var authController = require('./controllers/auth');
 
-// configure app
-app.use(morgan('dev')); // log requests to the console
+// Connect to the beerlocker MongoDB
+// mongoose.connect('mongodb://beepidb:Test!ng123@ds031832.mongolab.com:31832/beepidb'); 
+mongoose.connect('mongodb://localhost:27017/beepidb'); 
+
+// Create our Express application
+var app = express();
+
+// Use the body-parser package in our application
 app.use(bodyParser.urlencoded({
-	extended: true
-})); 
+  extended: true
+}));
 
-// configure body parser
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+// Use the passport package in our application
+app.use(passport.initialize());
 
-var port     = process.env.PORT || 8080; // set our port
-
-var mongoose   = require('mongoose');
-mongoose.connect('mongodb://beepidb:Test!ng123@ds031832.mongolab.com:31832/beepidb'); // connect to our database
-var Bear     = require('./app/models/bear');
-
-// ROUTES FOR OUR API
-// =============================================================================
-
-// create our router
+// Create our Express router
 var router = express.Router();
 
-// MIDDLEWARE FOR ALL REQUESTS
-// =============================================================================
-router.use(function(req, res, next) {
-	// do logging
-	console.log('Something is happening.');
-	next();
-});
+// Create endpoint handlers for /beers
+router.route('/beers')
+  .post(beerController.postBeers)
+  .get(beerController.getBeers);
 
-// test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-router.get('/', function(req, res) {
-	res.json({ message: 'hooray! welcome to our api!' });	
-});
+// Create endpoint handlers for /beers/:beer_id
+router.route('/beers/:beer_id')
+  .get(beerController.getBeer)
+  .put(beerController.putBeer)
+  .delete(beerController.deleteBeer);
 
-// on routes that end in /bears
-// ----------------------------------------------------
-var bearRoutes = router.route('/bears'); 
+// Create endpoint handlers for /users
+router.route('/users')
+  .post(userController.postUsers)
+  .get(authController.isAuthenticated, userController.getUsers);
 
-// create a bear (accessed at POST http://localhost:8080/bears)
-bearRoutes.post(function(req, res) {	
-	var bear = new Bear();		// create a new instance of the Bear model
-	bear.name = req.body.name;  // set the bears name (comes from the request)
-	bear.save(function(err) {
-		if (err) res.send(err);
-		res.json({ message: 'Bear created!', data: bear });
-	});
-}); 
-
-// get all the bears (accessed at GET http://localhost:8080/api/bears)
-bearRoutes.get(function(req, res) {
-	Bear.find(function(err, bears) {
-		if (err)
-			res.send(err);
-
-		res.json(bears);
-	});
-});
-
-bearRoutes.delete(function(req, res) {
-	Bear.findByIdAndRemove(req.params.bear_id, function(err) {
-		if (err) res.send(err); 
-		res.json({message: "Bear removed Successfully"}); 
-	});
-}); 
-
-// on routes that end in /bears/:bear_id
-// ----------------------------------------------------
-router.route('/bears/:bear_id')
-
-	// get the bear with that id
-	.get(function(req, res) {
-		Bear.findById(req.params.bear_id, function(err, bear) {
-			if (err)
-				res.send(err);
-			res.json(bear);
-		});
-	})
-
-	// update the bear with this id
-	.put(function(req, res) {
-		Bear.findById(req.params.bear_id, function(err, bear) {
-
-			if (err)
-				res.send(err);
-
-			bear.name = req.body.name;
-			bear.save(function(err) {
-				if (err)
-					res.send(err);
-
-				res.json({ message: 'Bear updated!' });
-			});
-
-		});
-	})
-
-	// delete the bear with this id
-	.delete(function(req, res) {
-		Bear.remove({
-			_id: req.params.bear_id
-		}, function(err, bear) {
-			if (err)
-				res.send(err);
-
-			res.json({ message: 'Successfully deleted' });
-		});
-	});
-
-
-// REGISTER OUR ROUTES -------------------------------
+// Register all our routes with /api
 app.use('/api', router);
 
-// START THE SERVER
-// =============================================================================
-app.listen(port);
-console.log('Magic happens on port ' + port);
+// Start the server
+app.listen(8000);
+console.log("Magic is happening!.");

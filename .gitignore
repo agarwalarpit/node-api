@@ -1,1 +1,4 @@
 mongodb.db
+.idea*
+*.DS_Store*
+node_modules*
