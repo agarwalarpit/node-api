@@ -1,50 +1,109 @@
-
 // Load required packages
-var express = require('express');
+var config   = require('config');
+var restify  = require('restify');
 var mongoose = require('mongoose');
-var bodyParser = require('body-parser');
-var beerController = require('./controllers/beer');
-var userController = require('./controllers/user');
-var passport = require('passport');
-var authController = require('./controllers/auth');
+var redis    = require('redis');
+var url		 = require('url');
 
-// Connect to the beerlocker MongoDB
-// mongoose.connect('mongodb://beepidb:Test!ng123@ds031832.mongolab.com:31832/beepidb'); 
-mongoose.connect('mongodb://localhost:27017/beepidb'); 
+/**** Set Environment Variables ****/
+var server = restify.createServer();
+var env = process.env.NODE_ENV || 'dev';
+console.log(env);
 
-// Create our Express application
-var app = express();
+/**** Init MongoDB ****/
+var initMongo;
+initMongo = function () {
+    var db_config = null;
+    var url = null;
 
-// Use the body-parser package in our application
-app.use(bodyParser.urlencoded({
-  extended: true
+    if (env == 'dev') {
+        db_config = config.get('BEEPI.MONGO_DEV');
+        url = 'mongodb://' + db_config.host + ':' + db_config.port + '/' + db_config.dbName;
+    } else if (env == 'production') {
+        db_config = config.get("BEEPI.MONGO_PROD");
+        url = 'mongodb://' + db_config.user + ':' + db_config.password + '@' + db_config.host + ':' + db_config.port + '/' + db_config.dbName;
+    }
+
+    mongoose.connect(url, {server: {auto_reconnect: true}});
+
+    var db = mongoose.connection;
+    db.on('error', console.error.bind(console, 'connection error:'));
+
+    db.once('open', function callback(cb) {
+        console.info('MongoDB connection is established');
+    });
+
+    db.on('disconnected', function () {
+        console.error('MongoDB disconnected!');
+        mongoose.connect(url, {server: {auto_reconnect: true}});
+    });
+
+    db.on('reconnected', function () {
+        console.info('MongoDB reconnected!');
+    });
+};
+
+/**** Init RedisDB ****/
+var initRedis;
+initRedis = function () {
+    if (env == 'dev') {
+        var redisConfig = config.get("BEEPI.REDIS_DEV");
+        global.REDIS_CLIENT = redis.createClient(redisConfig['PORT'], redisConfig['HOST'], {no_ready_check: true});
+    } else {
+        var redis_url = url.parse(config.get("BEEPI.REDIS_PROD.URL"));
+        global.REDIS_CLIENT = redis.createClient(redis_url.port, redis_url.hostname, {no_ready_check: true});
+        global.REDIS_CLIENT.auth(redis_url.auth.split(":")[1]);
+    }
+
+    global.REDIS_CLIENT.set('foo', 'bar');
+    global.REDIS_CLIENT.get('foo', function (err, reply) {
+        // body...
+        console.log(reply);
+    });
+};
+
+/****************** Server Init ****************************/
+var initServer;
+initServer = function () {
+    server.listen(config.get('BEEPI.SERVER.PORT'), function () {
+        console.log('Server Started Listening on the port ' + config.get("BEEPI.SERVER.PORT"));
+        console.log("Magic is happening!.");
+    });
+};
+
+/********************* MIDDLEWEARS ***********************/
+server.use(restify.acceptParser(server.acceptable));
+server.use(restify.dateParser());
+server.use(restify.queryParser());
+server.use(restify.jsonp());
+server.use(restify.gzipResponse());
+server.use(restify.bodyParser({ mapParams:false}));
+server.use(restify.throttle({
+    burst: 100,
+    rate: 50,
+    ip: true,
+    overrides: {
+        '192.168.1.1': {
+            rate: 0,        // unlimited
+            burst: 0
+        }
+    }
 }));
 
-// Use the passport package in our application
-app.use(passport.initialize());
+/*********************** ROUTES ***************************/
+server.post('/test', function (req, res, next) {
+    console.log(res, req);
+    res.send('Done.');
+    next();
+});
 
-// Create our Express router
-var router = express.Router();
+require('./routes')(server);
 
-// Create endpoint handlers for /beers
-router.route('/beers')
-  .post(beerController.postBeers)
-  .get(beerController.getBeers);
+/*************** Let's start the server now *******************/
+var init = function(){
+    initRedis();
+    initServer();
+};
 
-// Create endpoint handlers for /beers/:beer_id
-router.route('/beers/:beer_id')
-  .get(beerController.getBeer)
-  .put(beerController.putBeer)
-  .delete(beerController.deleteBeer);
-
-// Create endpoint handlers for /users
-router.route('/users')
-  .post(userController.postUsers)
-  .get(authController.isAuthenticated, userController.getUsers);
-
-// Register all our routes with /api
-app.use('/api', router);
-
-// Start the server
-app.listen(8000);
-console.log("Magic is happening!.");
+init();
+module.exports = server;

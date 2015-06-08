@@ -1,4 +1,4 @@
-var sql = require('mssql'); 
+var sql = require('mssql');
 var MongoClient = require('mongodb').MongoClient; 
 var assert = require('assert');
 var async = require('async'); 
@@ -12,8 +12,8 @@ var config = {
     password: 'NoMoreL3M0N5',
     server: 'db1.dev.beepi.com', // You can use 'localhost\\instance' to connect to named instance 
     database: 'CarSavvyQA',
-    stream: true,
-}
+    stream: true
+};
 
 var printItem = function (item, doneCallback) {
     console.log(item);

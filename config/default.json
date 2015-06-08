@@ -1,0 +1,33 @@
+{
+  "BEEPI": {
+    "MONGO_PROD": {
+      "HOST"     : "*",
+      "PORT"     : 41432,
+      "USER"     : "beepiuser",
+      "PASSWORD" : "somepassword",
+      "DB_NAME"   : "beepidb"
+    },
+    "MONGO_DEV": {
+      "HOST"     : "localhost",
+      "PORT"     : 27017,
+      "DB_NAME"   : "beepidb"
+    },
+    "REDIS_PROD": {
+      "URL" : "*"
+    },
+    "REDIS_DEV": {
+      "HOST": "localhost",
+      "PORT": 6379
+    },
+    "SERVER": {
+      "PROTOCOL" : "http",
+      "HOST" : "localhost",
+      "PORT" : 8080
+    },
+    "AWSS3": {
+      "KEY"    : "",
+      "SECRET" : "",
+      "REGION" : ""
+    }
+  }
+}
